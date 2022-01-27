@@ -17,8 +17,7 @@ class Game extends React.Component {
 
     handleSubmit(event){
         event.preventDefault();
-        this.setState((state) => { return {attempts: state.attempts + 1}})
-        this.checkGuess(event.target[0].value);
+        this.checkGuess(event.target.elements[0].value);
     }
 
     getRandomWord(){
@@ -34,15 +33,14 @@ class Game extends React.Component {
                 'x-rapidapi-key': '15cd39e3d7mshb952ccd1d7ec421p1f15d8jsne8063d05b66d'
             }
         };
-        axios.request(options)
+       return axios.request(options)
             .then(res => {
-                const randomWord = res.data;
                 this.setState({
-                    word: randomWord.word,
+                    word: res.data.word,
                     attempts: 0,
                     didWin: false
                 });
-            })
+            });
     }
 
     checkGuess(guess){
@@ -50,10 +48,11 @@ class Game extends React.Component {
         let playerGuess = guess.toLowerCase();
 
         if(word === playerGuess){
-            this.setState(() => { return {didWin: true}})
+            this.setState(() => { return {attempts: 0, didWin: true}})
+            this.getRandomWord()
             return true;
         }
-        this.setState(() => { return {didWin: false}})
+        this.setState((state) => { return { attempts: state.attempts + 1, didWin: false}})
         return false;
     }
 
@@ -64,11 +63,10 @@ class Game extends React.Component {
     render() {
         return(
             <div>
-                <h2>{this.state.word}</h2>
-                <h2>Win Status: { this.state.didWin ? "You Won!" : "Guess Again"}</h2>
+                <h2 data-testid="word">{this.state.word}</h2>
+                <h2 data-testid="win-status">Win Status: { this.state.didWin ? "You Won!" : "Guess Again"}</h2>
                 <h3>Number of Attempts: {this.state.attempts}</h3>
                 <GuessesForm onSubmitGuess={this.handleSubmit}/>
-                <button onClick={this.getRandomWord}>Done Playing</button>
             </div>
         );
     }

@@ -7,8 +7,6 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-          <Instructions/>
-          <Game/>
           <link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
@@ -16,6 +14,8 @@ function App() {
             crossOrigin="anonymous"
           />
       </header>
+        <Instructions/>
+        <Game/>
     </div>
   );
 }
