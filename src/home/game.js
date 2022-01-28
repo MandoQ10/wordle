@@ -40,7 +40,9 @@ class Game extends React.Component {
                     attempts: 0,
                     didWin: false
                 });
+                console.log(this.state.word)
             });
+
     }
 
     checkGuess(guess){
@@ -49,7 +51,7 @@ class Game extends React.Component {
 
         if(word === playerGuess){
             this.setState(() => { return {attempts: 0, didWin: true}})
-            this.getRandomWord()
+
             return true;
         }
         this.setState((state) => { return { attempts: state.attempts + 1, didWin: false}})
@@ -63,7 +65,6 @@ class Game extends React.Component {
     render() {
         return(
             <div>
-                <h2 data-testid="word">{this.state.word}</h2>
                 <h2 data-testid="win-status">Win Status: { this.state.didWin ? "You Won!" : "Guess Again"}</h2>
                 <h3>Number of Attempts: {this.state.attempts}</h3>
                 <GuessesForm onSubmitGuess={this.handleSubmit}/>

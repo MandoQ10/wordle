@@ -1,6 +1,8 @@
-import {render, screen, fireEvent, getByText, getByRole, waitFor} from '@testing-library/react';
+import {render, screen, fireEvent, waitFor} from '@testing-library/react';
 import Game from '../home/game';
-import axiosMock from "axios";
+import axios from 'axios';
+
+const axiosResponse = {data: {word: "Mocks"}} ;
 
 test('renders numbers of attempts text', () => {
     render(<Game />);
@@ -24,17 +26,30 @@ test('entering a guess should increase the attempt counter by 1', () => {
 });
 
 test('if user enters correct word, the game is won', async() => {
+    jest.spyOn(axios, 'request').mockResolvedValueOnce(axiosResponse);
     render(<Game />)
 
-    const input = screen.getByPlaceholderText(/Enter Guess/i)
+    await waitFor(() => expect(axios.request).toHaveBeenCalledTimes(1))
+    const guessInput = screen.getByPlaceholderText(/Enter Guess/i)
     const submitButton = screen.getByText(/Submit/i)
-    const winStatusText = screen.getByRole('heading', { name: /Win Status: Guess Again/i })
 
-    const wordText = await waitFor( () => screen.getByTestId("word"))
-
-    fireEvent.change(input, {target: {value: 'Mocks'}})
+    fireEvent.change(guessInput, {target: {value: 'Mocks'}})
     fireEvent.click(submitButton)
 
-    expect(wordText).toHaveTextContent("Mocks")
-    // expect(winStatusText.textContent).toBe("Win Status: You Won!")
+    const winStatus = await waitFor(() => { return screen.getByTestId('win-status')})
+    expect(winStatus).toHaveTextContent("Win Status: You Won!")
+});
+test('if the user does not enter the correct word, they should guess again', async() => {
+    jest.spyOn(axios, 'request').mockResolvedValueOnce(axiosResponse);
+    render(<Game />)
+
+    await waitFor(() => expect(axios.request).toHaveBeenCalledTimes(1))
+    const guessInput = screen.getByPlaceholderText(/Enter Guess/i)
+    const submitButton = screen.getByText(/Submit/i)
+
+    fireEvent.change(guessInput, {target: {value: 'order'}})
+    fireEvent.click(submitButton)
+
+    const winStatus = await waitFor(() => { return screen.getByTestId('win-status')})
+    expect(winStatus).toHaveTextContent("Win Status: Guess Again")
 });
