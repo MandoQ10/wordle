@@ -7,17 +7,20 @@ class Game extends React.Component {
         super(props);
         this.state = {
             word: "",
-            attempts: 0,
-            didWin: false
+            attempts: 6,
+            didWin: false,
+            errorMessage: ""
         };
         this.getRandomWord = this.getRandomWord.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.checkGuess = this.checkGuess.bind(this);
+        this.getWinStatus = this.getWinStatus.bind(this);
     }
 
     handleSubmit(event){
         event.preventDefault();
         this.checkGuess(event.target.elements[0].value);
+        event.target.elements[0].value = "";
     }
 
     getRandomWord(){
@@ -37,25 +40,48 @@ class Game extends React.Component {
             .then(res => {
                 this.setState({
                     word: res.data.word,
-                    attempts: 0,
+                    attempts: 6,
                     didWin: false
                 });
                 console.log(this.state.word)
             });
-
     }
 
     checkGuess(guess){
         let word = this.state.word.toLowerCase();
         let playerGuess = guess.toLowerCase();
 
-        if(word === playerGuess){
-            this.setState(() => { return {attempts: 0, didWin: true}})
-
-            return true;
+        if(playerGuess.length !== 5 && this.state.attempts > 0){
+            this.setState(() => { return { errorMessage: "Invalid Guess: word must be 5 characters exactly" }})
+            return;
+        }else if(this.state.attempts === 0){
+            this.setState(() => { return { errorMessage: "You have no attempts remaining"} })
+            return;
         }
-        this.setState((state) => { return { attempts: state.attempts + 1, didWin: false}})
-        return false;
+        else{
+            this.setState(() => { return { errorMessage: "" }})
+        }
+
+        if(word === playerGuess && this.state.attempts > 0){
+            this.setState(() => { return { didWin: true }})
+            return;
+        }
+
+        this.setState((state) => { return { attempts: state.attempts - 1, didWin: false}})
+    }
+
+    getWinStatus(){
+        if(this.state.attempts === 6 && !this.state.didWin){
+            return "Begin Guessing!";
+        }
+
+        if(this.state.didWin){
+            return "You Won!";
+        }else if(!this.state.didWin && this.state.attempts > 0){
+            return "Guess Again";
+        }else{
+            return "You Lost!"
+        }
     }
 
     componentDidMount() {
@@ -65,8 +91,9 @@ class Game extends React.Component {
     render() {
         return(
             <div>
-                <h2 data-testid="win-status">Win Status: { this.state.didWin ? "You Won!" : "Guess Again"}</h2>
-                <h3>Number of Attempts: {this.state.attempts}</h3>
+                <h2 data-testid="win-status">Win Status: { this.getWinStatus()}</h2>
+                <h3>Attempts Remaining: {this.state.attempts}</h3>
+                <h3 data-testid="error-label">{this.state.errorMessage}</h3>
                 <GuessesForm onSubmitGuess={this.handleSubmit}/>
             </div>
         );
