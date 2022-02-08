@@ -1,0 +1,10 @@
+#game-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    gap: 10px;
+}

@@ -1,5 +1,5 @@
 import {render, screen, fireEvent, waitFor} from '@testing-library/react';
-import Game from '../home/game';
+import Game from '../components/game';
 import axios from 'axios';
 
 const axiosResponse = {data: {word: "Mocks"}} ;
@@ -110,19 +110,4 @@ test('if user enters correct word, the game is won', async() => {
 
     const winStatus = await waitFor(() => { return screen.getByTestId('win-status')})
     expect(winStatus).toHaveTextContent("Win Status: You Won!")
-});
-
-test('if the user does not enter the correct word, they should guess again', async() => {
-    jest.spyOn(axios, 'request').mockResolvedValueOnce(axiosResponse);
-    render(<Game />)
-
-    await waitFor(() => expect(axios.request).toHaveBeenCalledTimes(1))
-    const guessInput = screen.getByPlaceholderText(/Enter Guess/i)
-    const submitButton = screen.getByText(/Submit/i)
-
-    fireEvent.change(guessInput, {target: {value: 'order'}})
-    fireEvent.click(submitButton)
-
-    const winStatus = await waitFor(() => { return screen.getByTestId('win-status')})
-    expect(winStatus).toHaveTextContent("Win Status: Guess Again")
 });

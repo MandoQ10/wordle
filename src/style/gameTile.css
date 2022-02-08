@@ -1,0 +1,9 @@
+.game-tile {
+    height: 50px;
+    background-color: #121213;
+    color: white;
+    width: 40%;
+    font-size: 30px;
+    border-style: solid;
+    border-color: #d7dadc;
+}

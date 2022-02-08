@@ -1,0 +1,17 @@
+#header {
+    border-bottom: 2px solid black;
+    border-bottom-color: #d7dadc;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#header :first-child {
+    float: left;
+}
+
+#header :nth-child(2) {
+    font-size: 40px;
+}
+

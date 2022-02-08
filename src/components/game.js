@@ -1,26 +1,40 @@
 import React from 'react';
 import axios from "axios";
+import '../style/game.css'
 import GuessesForm from "./guessesForm";
+import Instructions from "./instructions";
+import GameRow from "./gameRow";
+import Header from "./header";
+import EmptyRow from "./emptyRow";
 
 class Game extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             word: "",
+            playerGuesses: [],
+            emptyRows: Array(6).fill(" "),
             attempts: 6,
             didWin: false,
-            errorMessage: ""
+            errorMessage: "",
+            didOpenInstructions: false
         };
         this.getRandomWord = this.getRandomWord.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.checkGuess = this.checkGuess.bind(this);
         this.getWinStatus = this.getWinStatus.bind(this);
+        this.toggleInstructions = this.toggleInstructions.bind(this);
+        this.removeEmptyRow = this.removeEmptyRow.bind(this);
     }
 
     handleSubmit(event){
         event.preventDefault();
         this.checkGuess(event.target.elements[0].value);
         event.target.elements[0].value = "";
+    }
+
+    toggleInstructions(){
+        this.setState((prevState) => { return { didOpenInstructions: !prevState.didOpenInstructions }})
     }
 
     getRandomWord(){
@@ -63,22 +77,25 @@ class Game extends React.Component {
         }
 
         if(word === playerGuess && this.state.attempts > 0){
-            this.setState(() => { return { didWin: true }})
+            this.removeEmptyRow();
+            this.setState((prevState) => { return { attempts: prevState.attempts - 1, didWin: true, playerGuesses: [...prevState.playerGuesses, playerGuess] }})
             return;
         }
 
-        this.setState((state) => { return { attempts: state.attempts - 1, didWin: false}})
+        this.removeEmptyRow();
+        this.setState((prevState) => { return { attempts: prevState.attempts - 1, didWin: false, playerGuesses: [...prevState.playerGuesses, playerGuess]}})
+
+    }
+
+    removeEmptyRow(){
+        const currentEmptyRows = this.state.emptyRows;
+        currentEmptyRows.pop();
+        this.setState({emptyRows: currentEmptyRows});
     }
 
     getWinStatus(){
-        if(this.state.attempts === 6 && !this.state.didWin){
-            return "Begin Guessing!";
-        }
-
         if(this.state.didWin){
             return "You Won!";
-        }else if(!this.state.didWin && this.state.attempts > 0){
-            return "Guess Again";
         }else{
             return "You Lost!"
         }
@@ -89,12 +106,29 @@ class Game extends React.Component {
     }
 
     render() {
+
         return(
-            <div>
-                <h2 data-testid="win-status">Win Status: { this.getWinStatus()}</h2>
+            <div id="game-container">
+                <Header toggleInstructions={this.toggleInstructions}/>
+
+                {this.state.didOpenInstructions ? <Instructions closeInstructions={this.toggleInstructions}/> : null}
+
+                <h3 data-testid="win-status">Win Status: {this.getWinStatus()}</h3>
                 <h3>Attempts Remaining: {this.state.attempts}</h3>
                 <h3 data-testid="error-label">{this.state.errorMessage}</h3>
                 <GuessesForm onSubmitGuess={this.handleSubmit}/>
+
+
+                {this.state.playerGuesses.map((guess) => {
+                    return  <GameRow playerGuess={guess}/>
+                })}
+
+                { this.state.emptyRows.map((_ => {
+                    return <EmptyRow />
+                }))
+                }
+
+
             </div>
         );
     }
